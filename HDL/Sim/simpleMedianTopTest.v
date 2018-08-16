@@ -68,16 +68,17 @@ wire writeMedianMem;
 //wire fullImageDone;
 wire writeMedianData;
 
+wire [7:0] xAddressOut;
+assign xAddressOut = DUT.xAddressOut;
+wire [7:0] yAddressOut;
+assign yAddressOut = DUT.yAddressOut;
+
 
 //fifo signals
 //wire [7:0] xAddressFIFO_10;
 //assign xAddressFIFO_10 = DUT.xAddressFIFO[9];
 //wire [7:0] yAddressFIFO_10;
 //assign yAddressFIFO_10 = DUT.yAddressFIFO[9];
-wire dataFIFO;
-assign dataFIFO = DUT.dataFIFO[8];
-wire [3:0] counter;
-assign counter = DUT.counter;
 //wire startCounter;
 //assign startCounter = DUT.startCounter;
 

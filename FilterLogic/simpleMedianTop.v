@@ -38,15 +38,6 @@ output [7:0] yAddressOutMedianMem;
 output writeMedianMem;
 
 //for median storage logic
-localparam FIFODEPTH = 10;                      //FIFO is depth 10 (not 9 which is appropriate for a window) because we need to delay the address to align with the data and data is already a cycle late due to memory read
-localparam WINDOWSIZE = 9;
-reg [7:0] xAddressFIFO[0:FIFODEPTH-1];                 
-reg [7:0] yAddressFIFO[0:FIFODEPTH-1];
-reg [FIFODEPTH-2:0] dataFIFO;                   //data fifo needs to be only of depth 9 to store a window of data
-
-reg [3:0] counter;
-reg startCounter;
-
 wire memDataOut;
 wire [7:0] addressInMemX;                    //Comment if doing post syn test
 wire [7:0] addressInMemY;                    //Comment if doing post syn test
@@ -55,16 +46,34 @@ wire [12:0] activeWindows;                   //Comment if doing post syn test
 wire [7:0] yAddressOut;               
 wire [7:0] xAddressOut; 
 
+reg [7:0] yAddressOutReg;               
+reg [7:0] xAddressOutReg; 
+
 assign addressInMemX = (writeMem)?xAddressIn:xAddressOut;
 assign addressInMemY = (writeMem)?yAddressIn:yAddressOut;
 
-assign writeMedianData = (counter == 4)?1:dataFIFO[8];
-assign writeMedianMem = startCounter;
-assign xAddressOutMedianMem = xAddressFIFO[9];
-assign yAddressOutMedianMem = yAddressFIFO[9];
+//assign xAddressOutMedianMem = (writeMedianMem)?(xAddressOut):0;
+//assign yAddressOutMedianMem = (writeMedianMem)?(yAddressOut):0;
+
+assign xAddressOutMedianMem = (writeMedianMem)?(xAddressOutReg-1):0;
+assign yAddressOutMedianMem = (writeMedianMem)?(yAddressOutReg-1):0;
+
+assign writeMedianMem = medianDataOut;
+assign writeMedianData = medianDataOut;
+
+//Glue logic
+always @ (posedge clk) begin
+	if (reset) begin
+		xAddressOutReg <= 0;
+		yAddressOutReg <= 0;
+	end
+	else begin
+		xAddressOutReg <= xAddressOut;
+		yAddressOutReg <= yAddressOut;
+	end
+end
 
 //Instantiations
-
 //Memory module to store the image
 flatMem flatMemInst (
         .clk(clk), 
@@ -88,56 +97,6 @@ readImageV2 readImageInst (
         .fullImageDone(fullImageDone),
         .medianDataOut(medianDataOut)
 );
-
-integer i;
-initial begin
-    for (i = 0; i < FIFODEPTH; i = i + 1) begin
-        xAddressFIFO[i] = 0;
-        yAddressFIFO[i] = 0;
-        dataFIFO[i] = 0;
-    end
-end
-
-integer k;
-always @ (posedge clk) begin
-    if (reset) begin
-        startCounter <= 0;
-        counter <= 0;
-    end
-    else if (start) begin
-        xAddressFIFO[0] <= xAddressOut;
-        yAddressFIFO[0] <= yAddressOut;
-        dataFIFO <= {dataFIFO[FIFODEPTH-3:0], memDataOut};
-        for(k = 1; k < FIFODEPTH; k = k + 1) begin
-            xAddressFIFO[k] <= xAddressFIFO[k-1];
-            yAddressFIFO[k] <= yAddressFIFO[k-1];
-        end
-        if (medianDataOut) begin
-            if (counter == 8) begin
-                startCounter <= 1;
-                counter <= 0;
-            end
-            else begin
-                startCounter <= 1;
-            end
-        end
-        else begin
-            if (counter == 8) begin
-                counter <= 0;
-                startCounter <= 0;
-            end
-            else begin
-                startCounter <= startCounter;
-            end
-        end
-        if (startCounter) begin
-            counter <= (counter + 1) % 9;
-        end
-        else begin
-            counter <= 0;
-        end
-    end
-end
 
 
 //The number of active windows above which the FPGA should wake up
