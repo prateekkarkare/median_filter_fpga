@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+# Don't ignore directories
+!*/
+
+# Don't ignore .gitignore and *.foo files
+!.gitignore
+!*.vhd
+!*.v
