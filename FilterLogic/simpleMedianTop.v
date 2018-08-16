@@ -18,7 +18,7 @@
 
 //`timescale <time_units> / <precision>
 
-module simpleMedianTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, start, wakeUp, threshold, xAddressOutMedianMem, yAddressOutMedianMem, writeMedianData, writeMedianMem);
+module simpleMedianTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, start, wakeUp, fullImageDone, threshold, xAddressOutMedianMem, yAddressOutMedianMem, writeMedianData, writeMedianMem);
                        // addressInMemX, addressInMemY, activeWindows );    //These signals are just for testing and won't be used in the final design
 input clk, reset;
 input dataIn;
@@ -28,6 +28,7 @@ input writeMem;
 input start;
 input [12:0] threshold;
 
+output fullImageDone;
 output reg wakeUp;
 //output [7:0] addressInMemX;             //Only for PostSynthTest
 //output [7:0] addressInMemY;             //Only for PostSynthTest              

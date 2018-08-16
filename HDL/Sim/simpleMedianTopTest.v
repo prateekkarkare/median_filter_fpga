@@ -67,11 +67,7 @@ wire [7:0] yAddressOutMedianMem;
 wire writeMedianMem;
 //wire fullImageDone;
 wire writeMedianData;
-
-wire [7:0] xAddressOut;
-assign xAddressOut = DUT.xAddressOut;
-wire [7:0] yAddressOut;
-assign yAddressOut = DUT.yAddressOut;
+wire fullImageDone;
 
 
 //fifo signals
@@ -100,7 +96,8 @@ simpleMedianTop DUT (
         .start(start),
         .threshold(threshold),
         .writeMedianMem(writeMedianMem),
-        .writeMedianData(writeMedianData)
+        .writeMedianData(writeMedianData),
+		  .fullImageDone(fullImageDone)
 );
 
 //<statements>
