@@ -47,32 +47,13 @@ wire [12:0] activeWindows;                   //Comment if doing post syn test
 wire [7:0] yAddressOut;               
 wire [7:0] xAddressOut; 
 
-reg [7:0] yAddressOutReg;               
-reg [7:0] xAddressOutReg; 
-
 assign addressInMemX = (writeMem)?xAddressIn:xAddressOut;
 assign addressInMemY = (writeMem)?yAddressIn:yAddressOut;
 
-//assign xAddressOutMedianMem = (writeMedianMem)?(xAddressOut):0;
-//assign yAddressOutMedianMem = (writeMedianMem)?(yAddressOut):0;
-
-assign xAddressOutMedianMem = (writeMedianMem)?(xAddressOutReg-1):0;
-assign yAddressOutMedianMem = (writeMedianMem)?(yAddressOutReg-1):0;
-
+assign xAddressOutMedianMem = xAddressOut;
+assign yAddressOutMedianMem = yAddressOut;
 assign writeMedianMem = medianDataOut;
 assign writeMedianData = medianDataOut;
-
-//Glue logic
-always @ (posedge clk) begin
-	if (reset) begin
-		xAddressOutReg <= 0;
-		yAddressOutReg <= 0;
-	end
-	else begin
-		xAddressOutReg <= xAddressOut;
-		yAddressOutReg <= yAddressOut;
-	end
-end
 
 //Instantiations
 //Memory module to store the image

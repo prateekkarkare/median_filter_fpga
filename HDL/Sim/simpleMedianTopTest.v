@@ -65,10 +65,12 @@ wire [7:0] xAddressOutMedianMem;
 wire [7:0] yAddressOutMedianMem;     
 //wire [11:0] activeWindows;  //for PostSyn test
 wire writeMedianMem;
-//wire fullImageDone;
-wire writeMedianData;
 wire fullImageDone;
+wire writeMedianData;
 
+
+wire memDataOut;
+assign memDataOut = DUT.memDataOut;
 
 //fifo signals
 //wire [7:0] xAddressFIFO_10;
@@ -120,8 +122,13 @@ initial begin
     writeMem = 0;
     //#5 NSYSRESET = 1;
     //#10 NSYSRESET = 0;
-    #15
+    #10
     start = 1;
+end
+
+initial begin
+	#4244925 start = 0;
+	#10 start = 1;
 end
 
 endmodule

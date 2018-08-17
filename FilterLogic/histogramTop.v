@@ -18,7 +18,7 @@
 
 //`timescale <time_units> / <precision>
 
-module histogramTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, start, wakeUp, threshold, readMedianImage  );
+module histogramTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, readHistogram, start, wakeUp, fullImageDone, threshold, readMedianImage, xHistogramOut, yHistogramOut, xValid, yValid );
 input clk;
 input reset;
 input writeMem;
@@ -28,14 +28,20 @@ input dataIn;
 input start;
 input [12:0] threshold;
 input readMedianImage;
+input readHistogram;
 
+output [7:0] xHistogramOut;
+output [7:0] yHistogramOut;
+output xValid;
+output yValid;
 output wakeUp;
+output fullImageDone;
 
 wire [7:0] xAddressInMedianMem;
 wire [7:0] yAddressInMedianMem;
 wire [7:0] xAddressOutMedianMem;
 wire [7:0] yAddressOutMedianMem;
-//wire medianDataOut;
+wire medianDataOut;
 wire writeMedianMemInput;
 wire writeMedianMem;
 
@@ -45,9 +51,20 @@ reg [7:0] yAddressInMedianMemReg;
 //These muxes control the input to the memory which stores the median filtered image
 //1. Mux controlled by readMedianImage signal either lets the top level address in (by user) or the addressdriven by the internal logic
 //2. following mux controls whether the address is to be subtracted or not (this is required to prevent invalid addresses) 
-assign xAddressInMedianMem = (writeMedianMemInput)?(xAddressInMedianMemReg-1):xAddressInMedianMemReg;
-assign yAddressInMedianMem = (writeMedianMemInput)?(yAddressInMedianMemReg-1):yAddressInMedianMemReg;
-assign writeMedianMemInput = (!readMedianImage)?writeMedianMem:0;
+assign xAddressInMedianMem = (readMedianImage)?xAddressIn:(writeMedianMemInput)?(xAddressInMedianMemReg-1):0;
+assign yAddressInMedianMem = (readMedianImage)?yAddressIn:(writeMedianMemInput)?(yAddressInMedianMemReg-1):0;
+assign writeMedianMemInput = (readMedianImage)?0:writeMedianMem;
+
+always @(posedge clk) begin
+    if (reset) begin
+        xAddressInMedianMemReg <= 0;
+        yAddressInMedianMemReg <= 0;
+    end
+    else begin
+        xAddressInMedianMemReg <= xAddressOutMedianMem; 
+        yAddressInMedianMemReg <= yAddressOutMedianMem;
+    end
+end
 
 //<statements>
 simpleMedianTop simpleMedianTopINST (
@@ -63,7 +80,8 @@ simpleMedianTop simpleMedianTopINST (
             .xAddressOutMedianMem(xAddressOutMedianMem), 
             .yAddressOutMedianMem(yAddressOutMedianMem), 
             .writeMedianMem(writeMedianMem),
-            .writeMedianData(writeMedianData)
+            .writeMedianData(writeMedianData),
+				.fullImageDone(fullImageDone)
             );
 
 flatMem filteredImageMem (
@@ -72,7 +90,7 @@ flatMem filteredImageMem (
             .xAddressIn(xAddressInMedianMem), 
             .yAddressIn(yAddressInMedianMem), 
             .dataIn(writeMedianData),                
-            .dataOut(dataOut), 
+            .dataOut(medianDataOut), 
             .write(writeMedianMemInput)                  
             );
 
@@ -82,7 +100,7 @@ computeHistogram computeHistogramInst(
             .reset(reset),
             .xAddress(xAddressInMedianMem),
             .yAddress(yAddressInMedianMem),
-            .pixelData(medianDataOut),
+            .pixelData(writeMedianData),
             .startHistogram(start),
             .readHistogram(readHistogram), 
             .xHistogramOut(xHistogramOut), 
@@ -91,15 +109,6 @@ computeHistogram computeHistogramInst(
             .yValid(yValid) 
             );
 
-always @(posedge clk) begin
-    if (reset) begin
-        xAddressInMedianMemReg <= 0;
-        yAddressInMedianMemReg <= 0;
-    end
-    else begin
-        xAddressInMedianMemReg <= (readMedianImage)?xAddressIn:xAddressOutMedianMem; 
-        yAddressInMedianMemReg <= (readMedianImage)?yAddressIn:yAddressOutMedianMem;
-    end
-end
+
 endmodule
 

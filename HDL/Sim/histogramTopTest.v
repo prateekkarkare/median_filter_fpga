@@ -65,8 +65,14 @@ reg dataIn;
 reg start;
 reg [12:0] threshold;
 reg readMedianImage;
+reg readHistogram;
 
 wire wakeUp;
+wire fullImageDone;
+wire [7:0] xHistogramOut;
+wire [7:0] yHistogramOut;
+wire xValid;
+wire yValid;
 
 //Internal Signals
 wire [7:0] xAddressInMedianMem;
@@ -74,7 +80,6 @@ wire [7:0] yAddressInMedianMem;
 wire [7:0] xAddressOutMedianMem;
 wire [7:0] yAddressOutMedianMem;
 wire writeMedianMem;
-wire dataOutMedianMem;
 wire dataInMedianMem;
 wire medianDataOut;
 
@@ -91,7 +96,6 @@ assign yAddressInMedianMem = DUT.yAddressInMedianMem;
 assign xAddressOutMedianMem = DUT.xAddressOutMedianMem;
 assign yAddressOutMedianMem = DUT.yAddressOutMedianMem;
 assign writeMedianMem = DUT.writeMedianMem;
-assign dataOutMedianMem = DUT.dataOut;
 assign dataInMedianMem = DUT.filteredImageMem.dataIn;
 assign medianDataOut = DUT.medianDataOut;
 
@@ -109,9 +113,15 @@ histogramTop DUT (
     .start(start),
     .threshold(threshold),
     .readMedianImage(readMedianImage),
+	 .readHistogram(readHistogram),
 
     // Outputs
-    .wakeUp(wakeUp)
+    .wakeUp(wakeUp),
+	 .fullImageDone(fullImageDone),
+	 .xHistogramOut(xHistogramOut),
+	 .yHistogramOut(yHistogramOut),
+	 .xValid(xValid),
+	 .yValid(yValid)
 
     // Inouts
 
@@ -136,15 +146,14 @@ initial begin
     end 
     #10
     writeMem = 0;
-    #15
     start = 1;
 end
 
-
 initial begin
-    #864135
+    #4244885
     start = 0;
     readMedianImage = 1;
+	 readHistogram = 1;
     for (i = 0; i < 240; i = i + 1) begin
         xAddressIn = i;
         for (j = 0; j < 180; j = j + 1) begin
@@ -154,9 +163,6 @@ initial begin
     end 
 end
 
-initial begin
-    
-end
 
 endmodule
 
