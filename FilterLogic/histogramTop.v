@@ -18,7 +18,7 @@
 
 //`timescale <time_units> / <precision>
 
-module histogramTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, readHistogram, start, wakeUp, fullImageDone, threshold, readMedianImage, xHistogramOut, yHistogramOut, xValid, yValid );
+module histogramTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, readHistogram, start, wakeUp, fullImageDone, threshold, readMedianImage, medianDataOut, xHistogramOut, yHistogramOut, xValid, yValid );
 input clk;
 input reset;
 input writeMem;
@@ -30,6 +30,7 @@ input [12:0] threshold;
 input readMedianImage;
 input readHistogram;
 
+output medianDataOut;
 output [7:0] xHistogramOut;
 output [7:0] yHistogramOut;
 output xValid;
@@ -51,9 +52,9 @@ reg [7:0] yAddressInMedianMemReg;
 //These muxes control the input to the memory which stores the median filtered image
 //1. Mux controlled by readMedianImage signal either lets the top level address in (by user) or the addressdriven by the internal logic
 //2. following mux controls whether the address is to be subtracted or not (this is required to prevent invalid addresses) 
-assign xAddressInMedianMem = (readMedianImage)?xAddressIn:(writeMedianMemInput)?(xAddressInMedianMemReg-1):0;
-assign yAddressInMedianMem = (readMedianImage)?yAddressIn:(writeMedianMemInput)?(yAddressInMedianMemReg-1):0;
-assign writeMedianMemInput = (readMedianImage)?0:writeMedianMem;
+assign xAddressInMedianMem = (readMedianImage)?xAddressIn:(writeMedianMemInput)?(xAddressInMedianMemReg-8'b00000001):8'b0;
+assign yAddressInMedianMem = (readMedianImage)?yAddressIn:(writeMedianMemInput)?(yAddressInMedianMemReg-8'b00000001):8'b0;
+assign writeMedianMemInput = (readMedianImage)?1'b0:writeMedianMem;
 
 always @(posedge clk) begin
     if (reset) begin
