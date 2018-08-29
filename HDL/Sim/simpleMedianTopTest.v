@@ -49,58 +49,57 @@ end
 always @(SYSCLK)
     #(SYSCLK_PERIOD / 2.0) SYSCLK <= !SYSCLK;
 
-
-reg writeMem;
-reg dataIn;
 reg start;
-reg [7:0] xAddressIn;
-reg [7:0] yAddressIn;
 reg [12:0] threshold;
 
+wire memDataOut;
 wire wakeUp;
-//wire memDataOut;
-//wire [7:0] addressInMemX;   //for PostSyn test
-//wire [7:0] addressInMemY;   //for PostSyn test
-wire [7:0] xAddressOutMedianMem;     
-wire [7:0] yAddressOutMedianMem;     
+wire [7:0] xAddressOut;     
+wire [7:0] yAddressOut;     
 //wire [11:0] activeWindows;  //for PostSyn test
 wire writeMedianMem;
 wire fullImageDone;
+wire binaryMemWriteEnable;
 wire writeMedianData;
-
-
-wire memDataOut;
-assign memDataOut = DUT.memDataOut;
-
-//fifo signals
-//wire [7:0] xAddressFIFO_10;
-//assign xAddressFIFO_10 = DUT.xAddressFIFO[9];
-//wire [7:0] yAddressFIFO_10;
-//assign yAddressFIFO_10 = DUT.yAddressFIFO[9];
-//wire startCounter;
-//assign startCounter = DUT.startCounter;
-
 
 //Instantiation
 simpleMedianTop DUT (
+			// Inputs
         .clk(SYSCLK),
         .reset(NSYSRESET),
-        .writeMem(writeMem),
-        .xAddressIn(xAddressIn),
-        .yAddressIn(yAddressIn),
-        .dataIn(dataIn),
-        .wakeUp(wakeUp),
-//        .addressInMemX(addressInMemX),              //for PostSyn test
-//        .addressInMemY(addressInMemY),              //for PostSyn test
-        .xAddressOutMedianMem(xAddressOutMedianMem),                  
-        .yAddressOutMedianMem(yAddressOutMedianMem),                  
-//        .activeWindows(activeWindows),              //for PostSyn test
+        .binaryDataIn(memDataOut),                  
         .start(start),
         .threshold(threshold),
+		  // Outputs
+		  .wakeUp(wakeUp),
         .writeMedianMem(writeMedianMem),
         .writeMedianData(writeMedianData),
-		  .fullImageDone(fullImageDone)
+		  .fullImageDone(fullImageDone),
+		  .xAddressOut(xAddressOut),                  
+        .yAddressOut(yAddressOut),
+		  .binaryMemWriteEnable(binaryMemWriteEnable)
 );
+
+// For Memory
+reg dataIn;
+wire [7:0] xMemAddressIn;
+wire [7:0] yMemAddressIn;
+reg [7:0] xAddressIn;
+reg [7:0] yAddressIn;
+
+// Glue logic
+assign xMemAddressIn = (start)?xAddressOut:xAddressIn;
+assign yMemAddressIn = (start)?yAddressOut:yAddressIn;
+
+flatMem testMem (
+	.clk(SYSCLK), 
+	.reset(NSYSRESET),
+	.xAddressIn(xMemAddressIn),
+	.yAddressIn(yMemAddressIn), 
+	.dataIn(dataIn), 
+	.write(binaryMemWriteEnable),
+	.dataOut(memDataOut) 
+	);
 
 //<statements>
 integer i;
@@ -108,7 +107,6 @@ integer j;
 initial begin
     #115 
     threshold = 50;
-    writeMem = 1;
     start = 0;
     for (i = 0; i < 240; i = i + 1) begin
         xAddressIn = i;
@@ -119,16 +117,12 @@ initial begin
         end
     end 
     #10
-    writeMem = 0;
-    //#5 NSYSRESET = 1;
-    //#10 NSYSRESET = 0;
-    #10
     start = 1;
 end
 
 initial begin
 	#4244925 start = 0;
-	#10 start = 1;
+	#50 start = 1;
 end
 
 endmodule

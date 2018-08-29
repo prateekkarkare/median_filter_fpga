@@ -18,13 +18,15 @@
 
 //`timescale <time_units> / <precision>
 
-module flatMem( clk, reset, xAddressIn, yAddressIn, dataIn, dataOut, write );
-input clk, reset;
-input [7:0] xAddressIn;
-input [7:0] yAddressIn;
-input write;
-input dataIn;
-output reg dataOut;
+module flatMem ( 
+	input clk, 
+	input reset,
+	input [7:0] xAddressIn,
+	input [7:0] yAddressIn, 
+	input dataIn, 
+	input write,
+	output reg dataOut 
+	);
 
 localparam IMWIDTH = 240;
 localparam IMHEIGHT = 180;

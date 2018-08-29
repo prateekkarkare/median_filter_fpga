@@ -25,46 +25,26 @@ module simpleMedianTop(
 	input start, 
 	input [12:0] threshold,
 	
-	output readBinaryMem, 
+	output binaryMemWriteEnable, 
 	output reg wakeUp, 
 	output fullImageDone, 
-	output [7:0] xAddressOutMedianMem, 
-	output [7:0] yAddressOutMedianMem, 
+	output [7:0] xAddressOut, 
+	output [7:0] yAddressOut, 
 	output writeMedianData, 
 	output writeMedianMem
 	);
-   //output addressInMemX, 
-	//output addressInMemY, 
 	//output activeWindows );    //These signals are just for postSynth testing and won't be used in the final design
 
 //for median storage logic
-wire memDataOut;
-wire [7:0] addressInMemX;                    //Comment if doing post syn test
-wire [7:0] addressInMemY;                    //Comment if doing post syn test
 wire [12:0] activeWindows;                   //Comment if doing post syn test
 
 wire [7:0] yAddressOut;               
 wire [7:0] xAddressOut; 
 
-assign addressInMemX = (writeMem)?xAddressIn:xAddressOut;
-assign addressInMemY = (writeMem)?yAddressIn:yAddressOut;
-
-assign xAddressOutMedianMem = xAddressOut;
-assign yAddressOutMedianMem = yAddressOut;
 assign writeMedianMem = medianDataOut;
 assign writeMedianData = medianDataOut;
-
+assign binaryMemWriteEnable = !start;
 //Instantiations
-//Memory module to store the image
-flatMem flatMemInst (
-        .clk(clk), 
-        .reset(reset),
-        .xAddressIn(addressInMemX),
-        .yAddressIn(addressInMemY),
-        .dataIn(dataIn), 
-        .dataOut(memDataOut), 
-        .write(writeMem)
-);
 
 //Main logic to read and compute median filtering
 readImageV2 readImageInst ( 
@@ -85,7 +65,7 @@ readImageV2 readImageInst (
 
 //Threshold comparator
 always @ (posedge clk) begin
-    if (reset) begin
+    if (reset || !start) begin
         wakeUp <= 0;
     end
     else if ((activeWindows > threshold) && fullImageDone) begin
