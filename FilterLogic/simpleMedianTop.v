@@ -22,7 +22,8 @@ module simpleMedianTop(
 	input clk, 
 	input reset, 
 	input binaryDataIn, 
-	input start, 
+	input start,
+	input init,
 	input [12:0] threshold,
 	
 	output binaryMemWriteEnable, 
@@ -43,13 +44,14 @@ wire [7:0] xAddressOut;
 
 assign writeMedianMem = medianDataOut;
 assign writeMedianData = medianDataOut;
-assign binaryMemWriteEnable = !start;
+assign binaryMemWriteEnable = 1'b0;
 //Instantiations
 
 //Main logic to read and compute median filtering
 readImageV2 readImageInst ( 
         .clk(clk), 
-        .reset(reset), 
+        .reset(reset),
+		  .init(init),
         .xAddressOut(xAddressOut),
         .yAddressOut(yAddressOut), 
         .dataIn(binaryDataIn), 
@@ -62,7 +64,6 @@ readImageV2 readImageInst (
 
 //The number of active windows above which the FPGA should wake up
 //13 bit wide register for threshold. Since the number fo windows is 4800 (maximum)
-
 //Threshold comparator
 always @ (posedge clk) begin
     if (reset || !start) begin

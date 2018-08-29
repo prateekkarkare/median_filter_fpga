@@ -85,11 +85,12 @@ assign windowRowCount = DUT.windowRowCount;
 
 reg start;
 reg dataIn;
+reg init;
 
 readImageV2 DUT( 
         .clk(SYSCLK),
         .reset(NSYSRESET),
-        //.addressOut(addressOut),
+		  .init(init),
         .xAddressOut(xAddressOut),
         .yAddressOut(yAddressOut),
         .dataIn(dataIn),
@@ -100,26 +101,29 @@ readImageV2 DUT(
         .medianDataOut(medianDataOut)
 );
 //<statements>
+
 always @ (posedge SYSCLK) begin
-    dataIn = $random%2;
+    dataIn = $random%2;	
 	 if (fullImageDone) begin
-		start <= 0;
+		init <= 1;
 	 end
 	 else begin
-		start <= start;
-	 end	
+		init <= 0;
+	 end
 end
+
 
 localparam WINDOWSIZE = 3;
 localparam MEDIANVALUE = 4; //$floor(WINDOWSIZE*WINDOWSIZE/2);
 
 initial begin
     $display("d=%0d", MEDIANVALUE);
-    dataIn = 1'b0;
+    dataIn = 0;
     start = 0;
+	 init = 0;
     #35 start = 1;
-	 #4000000 start = 1;
 end
+
 
 endmodule
 

@@ -51,6 +51,7 @@ always @(SYSCLK)
 
 reg start;
 reg [12:0] threshold;
+reg init;
 
 wire memDataOut;
 wire wakeUp;
@@ -60,6 +61,7 @@ wire [7:0] yAddressOut;
 wire writeMedianMem;
 wire fullImageDone;
 wire binaryMemWriteEnable;
+wire wen;
 wire writeMedianData;
 
 //Instantiation
@@ -69,6 +71,7 @@ simpleMedianTop DUT (
         .reset(NSYSRESET),
         .binaryDataIn(memDataOut),                  
         .start(start),
+		  .init(init),
         .threshold(threshold),
 		  // Outputs
 		  .wakeUp(wakeUp),
@@ -90,6 +93,7 @@ reg [7:0] yAddressIn;
 // Glue logic
 assign xMemAddressIn = (start)?xAddressOut:xAddressIn;
 assign yMemAddressIn = (start)?yAddressOut:yAddressIn;
+assign wen = (start)?binaryMemWriteEnable:1;
 
 flatMem testMem (
 	.clk(SYSCLK), 
@@ -97,7 +101,7 @@ flatMem testMem (
 	.xAddressIn(xMemAddressIn),
 	.yAddressIn(yMemAddressIn), 
 	.dataIn(dataIn), 
-	.write(binaryMemWriteEnable),
+	.write(wen),
 	.dataOut(memDataOut) 
 	);
 
@@ -105,9 +109,11 @@ flatMem testMem (
 integer i;
 integer j;
 initial begin
+	 init = 1;
     #115 
     threshold = 50;
     start = 0;
+	 init = 0;
     for (i = 0; i < 240; i = i + 1) begin
         xAddressIn = i;
         for (j = 0; j < 180; j = j + 1) begin
@@ -122,6 +128,8 @@ end
 
 initial begin
 	#4244925 start = 0;
+	#10 init = 1;
+	#10 init = 0;
 	#50 start = 1;
 end
 

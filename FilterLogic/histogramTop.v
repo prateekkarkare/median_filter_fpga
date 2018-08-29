@@ -18,31 +18,43 @@
 
 //`timescale <time_units> / <precision>
 
-module histogramTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, readHistogram, start, wakeUp, fullImageDone, threshold, readMedianImage, medianDataOut, xHistogramOut, yHistogramOut, xValid, yValid );
-input clk;
-input reset;
-input writeMem;
-input [7:0] xAddressIn;
-input [7:0] yAddressIn;
-input dataIn;
-input start;
-input [12:0] threshold;
-input readMedianImage;
-input readHistogram;
-
-output medianDataOut;
-output [7:0] xHistogramOut;
-output [7:0] yHistogramOut;
-output xValid;
-output yValid;
-output wakeUp;
-output fullImageDone;
+module histogramTop ( 
+		input clk, 
+		input reset, 
+		input binaryDataIn, 
+		input readHistogram,
+		input start,
+		input [12:0] threshold, 
+				
+		output wakeUp, 
+		output fullImageDone, 
+		
+		// --- Binary Image mem interface --- //
+		output [7:0] xAddressOut,
+		output [7:0] yAddressOut,
+		output binaryMemWriteEnable,
+		// --------------------------------- //
+		
+		// --- Median Memory Interface --- // 
+		output [7:0] xAddressOutFiltered,
+		output [7:0] yAddressOutFiltered,
+		output filteredMemWriteEnable,
+		output medianData,
+		// ------------------------------ //
+		
+		// ---- Histogram Out Interface --- //
+		output [7:0] xHistogramOut, 
+		output [7:0] yHistogramOut, 
+		output xValid, 
+		output yValid
+		// ------------------------------- //
+		);
 
 wire [7:0] xAddressInMedianMem;
 wire [7:0] yAddressInMedianMem;
-wire [7:0] xAddressOutMedianMem;
-wire [7:0] yAddressOutMedianMem;
-wire medianDataOut;
+wire [7:0] xAddressOut;
+wire [7:0] yAddressOut;
+wire filteredDataOut;
 wire writeMedianMemInput;
 wire writeMedianMem;
 
@@ -62,24 +74,24 @@ always @(posedge clk) begin
         yAddressInMedianMemReg <= 0;
     end
     else begin
-        xAddressInMedianMemReg <= xAddressOutMedianMem; 
-        yAddressInMedianMemReg <= yAddressOutMedianMem;
+        xAddressInMedianMemReg <= xAddressOut; 
+        yAddressInMedianMemReg <= yAddressOut;
     end
 end
 
 //<statements>
 simpleMedianTop simpleMedianTopINST (
+				// Inputs 
             .clk(clk), 
-            .reset(reset), 
-            .writeMem(writeMem), 
-            .xAddressIn(xAddressIn), 
-            .yAddressIn(yAddressIn), 
-            .dataIn(dataIn), 
-            .start(start), 
-            .wakeUp(wakeUp), 
-            .threshold(threshold), 
-            .xAddressOutMedianMem(xAddressOutMedianMem), 
-            .yAddressOutMedianMem(yAddressOutMedianMem), 
+            .reset(reset),  
+            .binaryDataIn(binaryDataIn), 
+            .start(start),
+				.threshold(threshold),
+				// Outputs
+				.binaryMemWriteEnable(binaryMemWriteEnable),
+            .wakeUp(wakeUp),  
+            .xAddressOut(xAddressOut), 
+            .yAddressOut(yAddressOut), 
             .writeMedianMem(writeMedianMem),
             .writeMedianData(writeMedianData),
 				.fullImageDone(fullImageDone)
@@ -91,7 +103,7 @@ flatMem filteredImageMem (
             .xAddressIn(xAddressInMedianMem), 
             .yAddressIn(yAddressInMedianMem), 
             .dataIn(writeMedianData),                
-            .dataOut(medianDataOut), 
+            .dataOut(filteredDataOut), 
             .write(writeMedianMemInput)                  
             );
 

@@ -22,7 +22,8 @@ module readImageV2(
 	input clk, 
 	input reset, 
 	input dataIn, 
-	input start, 
+	input start,
+	input init,
 	output reg [7:0] xAddressOut, 
 	output reg [7:0] yAddressOut, 
 	output reg [12:0] activeWindows,
@@ -51,7 +52,6 @@ wire [3:0] windowSumWire;
 reg windowColDone, windowRowDone, windowDone, imageRowDone, fullImageDone, windowDoneReg;
 
 assign windowSumWire = windowSum + dataIn;
-//assign writeMedianMem = windowDone;
 assign medianDataOut = (windowSumWire > MEDIANVALUE)?windowDoneReg:1'b0;
 
 initial begin
@@ -69,7 +69,7 @@ initial begin
 end
 
 always @ (posedge clk) begin
-    if (reset) begin
+    if (reset || init) begin
         rowOffset <= 0;
         windowColCount <= 0;
         windowRowCount <= 0;
@@ -150,13 +150,14 @@ always @ (posedge clk) begin
 
     end
     else begin
-        rowOffset <= 0;
-        windowColCount <= 0;
-        windowRowCount <= 0;
-        windowOffset <= 0;
-        activeWindows <= 0;
-        windowDoneReg <= 0;
-		  fullImageDone <= 0;
+		  windowSum <= windowSum;
+        rowOffset <= rowOffset;
+        windowColCount <= windowColCount;
+        windowRowCount <= windowRowCount;
+        windowOffset <= windowOffset;
+        activeWindows <= activeWindows;
+        windowDoneReg <= windowDoneReg;
+		  fullImageDone <= fullImageDone;
     end
 end
 
