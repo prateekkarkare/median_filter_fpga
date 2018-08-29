@@ -18,17 +18,18 @@
 
 //`timescale <time_units> / <precision>
 
-module readImageV2( clk, reset, xAddressOut, yAddressOut, dataIn, start, activeWindows, fullImageDone, medianDataOut );
-input clk, reset;
-input start;
-input dataIn;
+module readImageV2( 
+	input clk, 
+	input reset, 
+	input dataIn, 
+	input start, 
+	output reg [7:0] xAddressOut, 
+	output reg [7:0] yAddressOut, 
+	output reg [12:0] activeWindows,
+	output fullImageDone, 
+	output medianDataOut
+	);
 //output reg [15:0] addressOut;
-output reg [7:0] xAddressOut;
-output reg [7:0] yAddressOut; 
-output reg [12:0] activeWindows;
-//output writeMedianMem;
-output fullImageDone;
-output medianDataOut;
 
 //Parameters
 localparam WINDOWSIZE = 3;
@@ -51,7 +52,7 @@ reg windowColDone, windowRowDone, windowDone, imageRowDone, fullImageDone, windo
 
 assign windowSumWire = windowSum + dataIn;
 //assign writeMedianMem = windowDone;
-assign medianDataOut = (windowSumWire > MEDIANVALUE)?windowDoneReg:0;
+assign medianDataOut = (windowSumWire > MEDIANVALUE)?windowDoneReg:1'b0;
 
 initial begin
     windowColDone = 0;
@@ -76,6 +77,7 @@ always @ (posedge clk) begin
         windowSum <= 0;
         activeWindows <= 0;
         windowDoneReg <= 0;
+		  fullImageDone <= 0;
     end
     else if (start) begin
         if (windowColCount == WINDOWSIZE - 1) begin
@@ -126,7 +128,7 @@ always @ (posedge clk) begin
             fullImageDone <= 1;
         end
         else begin
-            fullImageDone <= fullImageDone;
+            fullImageDone <= fullImageDone;;
         end
 
         //Logic to count the number of active windows
@@ -148,12 +150,13 @@ always @ (posedge clk) begin
 
     end
     else begin
-        rowOffset <= rowOffset;
-        windowColCount <= windowColCount;
-        windowRowCount <= windowRowCount;
-        windowOffset <= windowOffset;
-        activeWindows <= activeWindows;
-        windowDoneReg <= windowDoneReg;
+        rowOffset <= 0;
+        windowColCount <= 0;
+        windowRowCount <= 0;
+        windowOffset <= 0;
+        activeWindows <= 0;
+        windowDoneReg <= 0;
+		  fullImageDone <= 0;
     end
 end
 

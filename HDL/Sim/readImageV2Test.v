@@ -102,6 +102,12 @@ readImageV2 DUT(
 //<statements>
 always @ (posedge SYSCLK) begin
     dataIn = $random%2;
+	 if (fullImageDone) begin
+		start <= 0;
+	 end
+	 else begin
+		start <= start;
+	 end	
 end
 
 localparam WINDOWSIZE = 3;
@@ -112,6 +118,7 @@ initial begin
     dataIn = 1'b0;
     start = 0;
     #35 start = 1;
+	 #4000000 start = 1;
 end
 
 endmodule

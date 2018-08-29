@@ -18,25 +18,24 @@
 
 //`timescale <time_units> / <precision>
 
-module simpleMedianTop( clk, reset, writeMem, xAddressIn, yAddressIn, dataIn, start, wakeUp, fullImageDone, threshold, xAddressOutMedianMem, yAddressOutMedianMem, writeMedianData, writeMedianMem);
-                       // addressInMemX, addressInMemY, activeWindows );    //These signals are just for testing and won't be used in the final design
-input clk, reset;
-input dataIn;
-input [7:0] xAddressIn;
-input [7:0] yAddressIn;
-input writeMem;
-input start;
-input [12:0] threshold;
-
-output fullImageDone;
-output reg wakeUp;
-//output [7:0] addressInMemX;             //Only for PostSynthTest
-//output [7:0] addressInMemY;             //Only for PostSynthTest              
-//output [11:0] activeWindows;            //Only for PostSynthTest
-output writeMedianData;
-output [7:0] xAddressOutMedianMem;
-output [7:0] yAddressOutMedianMem;
-output writeMedianMem;
+module simpleMedianTop( 
+	input clk, 
+	input reset, 
+	input binaryDataIn, 
+	input start, 
+	input [12:0] threshold,
+	
+	output readBinaryMem, 
+	output reg wakeUp, 
+	output fullImageDone, 
+	output [7:0] xAddressOutMedianMem, 
+	output [7:0] yAddressOutMedianMem, 
+	output writeMedianData, 
+	output writeMedianMem
+	);
+   //output addressInMemX, 
+	//output addressInMemY, 
+	//output activeWindows );    //These signals are just for postSynth testing and won't be used in the final design
 
 //for median storage logic
 wire memDataOut;
@@ -73,7 +72,7 @@ readImageV2 readImageInst (
         .reset(reset), 
         .xAddressOut(xAddressOut),
         .yAddressOut(yAddressOut), 
-        .dataIn(memDataOut), 
+        .dataIn(binaryDataIn), 
         .activeWindows(activeWindows),
         .start(start),
         .fullImageDone(fullImageDone),
