@@ -27,7 +27,7 @@ module readImageV2(
 	output reg [7:0] xAddressOut, 
 	output reg [7:0] yAddressOut, 
 	output reg [12:0] activeWindows,
-	output fullImageDone, 
+	output reg fullImageDone, 
 	output medianDataOut
 	);
 //output reg [15:0] addressOut;
@@ -49,7 +49,7 @@ reg [3:0] windowSum;
 wire [3:0] windowSumWire;
 
 //status registers
-reg windowColDone, windowRowDone, windowDone, imageRowDone, fullImageDone, windowDoneReg;
+reg windowColDone, windowRowDone, windowDone, imageRowDone, windowDoneReg;
 
 assign windowSumWire = windowSum + dataIn;
 assign medianDataOut = (windowSumWire > MEDIANVALUE)?windowDoneReg:1'b0;

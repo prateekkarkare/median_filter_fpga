@@ -56,13 +56,25 @@ reg [7:0] yAddress;
 reg pixelData;
 reg readHistogram;
 reg startHistogram;
+reg clearHistogram;
 
 wire [7:0] xHistogramOut;
 wire [7:0] yHistogramOut;
+wire histogramClear;
 
 wire xValid;
 wire yValid;
 
+
+wire xClear;
+wire yClear;
+assign xClear = DUT.xClear;
+assign yClear = DUT.yClear;
+
+wire [7:0] xCounter;
+wire [7:0] yCounter;
+assign xCounter = DUT.xCounter;
+assign yCounter = DUT.yCounter;
 //Internal signals
 //wire [7:0] xHistogram_0;
 //assign xHistogram_0 = DUT.xHistogram[0];
@@ -82,11 +94,13 @@ computeHistogram DUT (
         .yAddress(yAddress),
         .pixelData(pixelData), 
         .startHistogram(startHistogram),
+		  .clearHistogram(clearHistogram),
         .readHistogram(readHistogram),
         .xHistogramOut(xHistogramOut),
         .yHistogramOut(yHistogramOut),
         .xValid(xValid),
-        .yValid(yValid)
+        .yValid(yValid),
+		  .histogramClear(histogramClear)
         );
 
 //<statements>
@@ -94,6 +108,7 @@ integer i;
 integer j;
 
 initial begin
+	 clearHistogram = 0;
     #125
     startHistogram = 1;
     readHistogram = 0;
@@ -101,7 +116,7 @@ initial begin
         xAddress = i;
         for (j = 0; j < 180; j = j + 1) begin
             yAddress = j;
-            pixelData = $urandom % 2;
+            pixelData = $random % 2;
             #(SYSCLK_PERIOD * 1);
         end
     end
@@ -110,6 +125,28 @@ end
 initial begin
     #432135
     readHistogram = 1;
+	 startHistogram = 0;
+end
+
+initial begin
+	#434995 readHistogram = 0;
+	#10 readHistogram = 1;
+end
+
+initial begin
+	#437405 readHistogram = 0;
+end
+
+initial begin
+	#440395 clearHistogram = 0;
+end
+
+initial begin
+	#440995 readHistogram = 1;
+end
+
+initial begin
+	#437995 clearHistogram = 1;
 end
 
 endmodule

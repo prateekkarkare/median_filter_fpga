@@ -39,8 +39,8 @@ module simpleMedianTop(
 //for median storage logic
 wire [12:0] activeWindows;                   //Comment if doing post syn test
 
-wire [7:0] yAddressOut;               
-wire [7:0] xAddressOut; 
+//wire [7:0] yAddressOut;               
+//wire [7:0] xAddressOut; 
 
 assign writeMedianMem = medianDataOut;
 assign writeMedianData = medianDataOut;

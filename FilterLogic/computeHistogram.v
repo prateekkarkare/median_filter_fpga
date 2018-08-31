@@ -18,19 +18,22 @@
 
 //`timescale <time_units> / <precision>
 
-module computeHistogram( clk, reset, xAddress, yAddress, pixelData, startHistogram, readHistogram, xHistogramOut, yHistogramOut, xValid, yValid );
-input clk;
-input reset;
-input startHistogram;
-input readHistogram;
-input [7:0] xAddress;
-input [7:0] yAddress;
-input pixelData;
-output reg [7:0] xHistogramOut;
-output reg [7:0] yHistogramOut;
-output reg xValid;
-output reg yValid;
-
+module computeHistogram ( 
+		input clk, 
+		input reset, 
+		input [7:0] xAddress, 
+		input [7:0] yAddress, 
+		input pixelData, 
+		input startHistogram, 
+		input readHistogram, 
+		input clearHistogram,
+		output reg [7:0] xHistogramOut, 
+		output reg [7:0] yHistogramOut, 
+		output reg xValid, 
+		output reg yValid,
+		output histogramClear
+		);
+		
 localparam IMWIDTH = 240;
 localparam IMHEIGHT = 180;
 
@@ -40,9 +43,10 @@ reg [7:0] yHistogram[0:IMHEIGHT-1];
 reg [7:0] xCounter;
 reg [7:0] yCounter;
 
-wire pixelData;
-wire [7:0] xAddress;
-wire [7:0] yAddress;
+reg xClear;
+reg yClear;
+
+assign histogramClear = xClear && yClear;
 
 integer i;
 integer j;
@@ -93,6 +97,29 @@ always @ (posedge clk) begin
         yHistogramOut <= yHistogram[yCounter];
         xHistogramOut <= xHistogram[xCounter];
     end
+	 else if (clearHistogram) begin
+		  if (xCounter == IMWIDTH - 1) begin
+				xCounter <= xCounter;
+				xClear <= 1;
+        end
+        else begin
+            xCounter <= xCounter + 1;
+				xClear <= 0;
+        end
+		  
+		  if (yCounter == IMHEIGHT - 1) begin
+            yCounter <= yCounter;
+				yClear <= 1;
+        end
+        else begin
+            yCounter <= yCounter + 1;
+				yClear <= 0;
+        end
+		  
+		  yHistogram[yCounter] <= 0;
+        xHistogram[xCounter] <= 0;
+		  
+	 end
     else begin
         xHistogramOut <= 0;
         yHistogramOut <= 0;
@@ -100,6 +127,8 @@ always @ (posedge clk) begin
         yCounter <= 0;
         xValid <= 0;
         yValid <= 0;
+		  xClear <= 0;
+		  yClear <= 0;
     end
 end
 
