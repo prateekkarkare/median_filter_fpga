@@ -79,10 +79,12 @@ wire medianData;
 
 // Histogram Signlas
 reg readHistogram;
+reg clearHistogram;
 wire [7:0] xHistogramOut;
 wire [7:0] yHistogramOut;
 wire xValid;
 wire yValid;
+wire histogramCleared;
 
 //Internal Signals
 
@@ -120,10 +122,12 @@ histogramTop DUT (
 		.medianData(medianData),
 		// Histogram Interface
 		.readHistogram(readHistogram),
+		.clearHistogram(clearHistogram),
 		.xHistogramOut(xHistogramOut),
 		.yHistogramOut(yHistogramOut),
 		.xValid(xValid),
-		.yValid(yValid)
+		.yValid(yValid),
+		.histogramCleared(histogramCleared)
     );
 
 // For filtered image memory

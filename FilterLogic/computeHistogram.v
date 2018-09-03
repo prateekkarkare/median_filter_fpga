@@ -31,7 +31,7 @@ module computeHistogram (
 		output reg [7:0] yHistogramOut, 
 		output reg xValid, 
 		output reg yValid,
-		output histogramClear
+		output histogramCleared
 		);
 		
 localparam IMWIDTH = 240;
@@ -46,7 +46,7 @@ reg [7:0] yCounter;
 reg xClear;
 reg yClear;
 
-assign histogramClear = xClear && yClear;
+assign histogramCleared = xClear && yClear;
 
 integer i;
 integer j;
