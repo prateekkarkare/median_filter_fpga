@@ -54,34 +54,39 @@ always @(SYSCLK)
 wire [7:0] xAddressOut;
 wire [7:0] yAddressOut;
 
-wire [15:0] rowOffset;
-wire [7:0] windowOffset;
-wire [1:0] windowColCount;
-wire [1:0] windowRowCount;
-wire windowRowDone;
-wire windowColDone;
-wire windowDone;
-wire imageRowDone;
 wire fullImageDone;
 //wire writeMedianMem;
 wire medianDataOut;
 
-wire [3:0] windowSum;
+
 wire [12:0] activeWindows;
 wire windowDoneReg;
-wire [3:0] windowSumWire;
 assign windowDoneReg = DUT.windowDoneReg;
-
+wire [3:0] windowSum;
 assign windowSum = DUT.windowSum;
+wire [3:0] windowSumWire;
 assign windowSumWire = DUT.windowSumWire;
+wire [7:0] windowOffset;
 assign windowOffset = DUT.windowOffset;
+wire imageRowDone;
 assign imageRowDone = DUT.imageRowDone;
+wire windowRowDone;
 assign windowRowDone = DUT.windowRowDone;
+wire windowColDone;
 assign windowColDone = DUT.windowColDone;
+wire windowDone;
 assign windowDone = DUT.windowDone;
+wire [15:0] rowOffset;
 assign rowOffset = DUT.rowOffset;
+wire [1:0] windowColCount;
 assign windowColCount = DUT.windowColCount;
+wire [1:0] windowRowCount;
 assign windowRowCount = DUT.windowRowCount;
+wire dataInSync1;
+assign dataInSync1 = DUT.dataInSync1;
+wire dataInSync2;
+assign dataInSync2 = DUT.dataInSync2;
+
 
 reg start;
 reg dataIn;

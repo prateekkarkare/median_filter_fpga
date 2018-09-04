@@ -45,13 +45,14 @@ reg [1:0] windowColCount;
 reg [1:0] windowRowCount;
 reg [7:0] windowOffset;
 reg [3:0] windowSum;
+reg dataInSync1, dataInSync2;
 
 wire [3:0] windowSumWire;
 
 //status registers
 reg windowColDone, windowRowDone, windowDone, imageRowDone, windowDoneReg;
 
-assign windowSumWire = windowSum + dataIn;
+assign windowSumWire = windowSum + dataInSync2;
 assign medianDataOut = (windowSumWire > MEDIANVALUE)?windowDoneReg:1'b0;
 
 initial begin
@@ -76,19 +77,24 @@ always @ (posedge clk) begin
         windowOffset <= 0;
         windowSum <= 0;
         activeWindows <= 0;
+		  windowDone <= 0;
         windowDoneReg <= 0;
 		  fullImageDone <= 0;
     end
     else if (start) begin
+		  //Register to determine that a single window computation is done
+		  windowDoneReg <= windowDone;
+		  dataInSync1 <= dataIn;
+		  dataInSync2 <= dataInSync1;
+		  
+		  //Counter to count number of columns in a window of interest (max 3 for a 3x3 window)
         if (windowColCount == WINDOWSIZE - 1) begin
             windowColCount <= 0;
         end
         else begin 
-            windowColCount <= (windowColCount + 1);                     //Counter to count number of columns in a window of interest (max 3 for a 3x3 window)
+            windowColCount <= (windowColCount + 1);                     
         end
     
-        windowDoneReg <= windowDone;                                    //Register to determine that a single window computation is done
-		  
 		  if (windowColDone) begin
             if (rowOffset == IMAGEHEIGHT - 1) begin
                 rowOffset <= 0;
@@ -100,11 +106,12 @@ always @ (posedge clk) begin
 					 rowOffset <= (rowOffset + 1);
 				end
             
+				//Counter to count number of rows in a window of interest (max 3 for a 3x3 window)
             if (windowRowCount == WINDOWSIZE - 1) begin
                 windowRowCount <= 0;
             end
             else begin
-                windowRowCount <= (windowRowCount + 1);                  //Counter to count number of rows in a window of interest (max 3 for a 3x3 window)
+                windowRowCount <= (windowRowCount + 1);                  
             end            
         end
         else begin
@@ -162,11 +169,9 @@ always @ (posedge clk) begin
 end
 
 //Combo logic to update status registers
-//TODO: parameterize all the hardcoded values
 always @ (*) begin
     xAddressOut = windowColCount + windowOffset;
     yAddressOut = rowOffset;
-    //addressOut = rowOffset + windowColCount + windowOffset;
 
     if (windowColCount == (WINDOWSIZE-1)) begin
         windowColDone = 1;
