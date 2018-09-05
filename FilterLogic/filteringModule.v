@@ -24,11 +24,13 @@ module filteringModule(
 	input dataIn, 
 	input start,
 	output [7:0] xAddressOut, 
-	output [7:0] yAddressOut, 
-	output reg [12:0] activeWindows,
+	output [7:0] yAddressOut,
+	output [7:0] xMedianAddress,
+	output [7:0] yMedianAddress,
 	output filterDone,
 	output filterReady,
-	output reg medianDataOut
+	output dataOut,
+	output writeEnable
 	);
 
 //Parameters
@@ -103,9 +105,7 @@ always @ (posedge clk) begin
 				iCounter <= 0;
 				xAddressCntr <= 0;
 				yAddressCntr <= 0;
-//				filterDone <= 0;
 				filterReady <= 1;
-				medianDataOut <= 0;
 				xAddressDone <= 0;
 				yAddressDone <= 0;
 			end
@@ -156,56 +156,23 @@ always @ (posedge xAddressDone) begin
 	end
 end
 
-// Data Processing logic
-reg [3:0] sum;
-wire [3:0] sumWire; 
-reg [3:0] pixelCounter;
-reg pixelCounterDone;
-reg [7:0] xMedianAddress;
-reg [7:0] yMedianAddress;
-reg [7:0] xMedianAddressOut;
-reg [7:0] yMedianAddressOut;
+// Connectors
+wire [7:0] xMedianAddress;
+wire [7:0] yMedianAddress;
+wire writeEnable;
+wire dataOut;
 
-reg write;
-
-assign sumWire = sum + dataIn; 
-
-always @ (posedge clk) begin
-	xMedianAddressOut <= xMedianAddress;
-	yMedianAddressOut <= yMedianAddress;
-end
-
-always @ (posedge clk) begin
-	if (dataValid) begin
-		if (pixelCounter == 8) begin
-			pixelCounter <= 0;
-			pixelCounterDone <= 1;
-			sum <= 0;
-			xMedianAddress <= xAddressCntr;
-			yMedianAddress <= yAddressCntr;
-			if (sumWire > 4) begin
-				write <= 1;
-			end
-			else begin
-				write <= 0;
-			end
-		end
-		else begin
-			pixelCounter <= pixelCounter + 1'b1;
-			pixelCounterDone <= 0;
-			sum <= sum + dataIn;
-			xMedianAddress <= xMedianAddress;
-			yMedianAddress <= yMedianAddress;
-			write <= 0;
-		end
-	end
-	else begin
-		pixelCounter <= 0;
-		sum <= 0;
-		xMedianAddress <= 0;
-		yMedianAddress <= 0;
-		write <= 0;
-	end
-end
+medianProcess dataProcessInst (
+	.clk(clk),
+	.reset(reset),
+	.dataValid(dataValid),
+	.xAddressIn(xAddressOut),
+	.yAddressIn(yAddressOut),
+	.dataIn(dataIn),
+	.writeEnable(writeEnable),
+	.xMedianAddress(xMedianAddress),
+	.yMedianAddress(yMedianAddress),
+	.dataOut(dataOut)
+	);
 
 endmodule

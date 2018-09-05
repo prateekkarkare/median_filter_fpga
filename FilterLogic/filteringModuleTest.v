@@ -29,15 +29,17 @@ module filteringModuleTest;
 	reg reset;
 	reg dataIn;
 	reg start;
-	reg init;
 
 	// Outputs
 	wire [7:0] xAddressOut;
 	wire [7:0] yAddressOut;
+	wire [7:0] xMedianAddress;
+	wire [7:0] yMedianAddress;
 	wire [12:0] activeWindows;
 	wire filterDone;
-	wire medianDataOut;
+	wire dataOut;
 	wire filterReady;
+	wire writeEnable;
 
 	// Instantiate the Unit Under Test (UUT)
 	filteringModule uut (
@@ -47,10 +49,12 @@ module filteringModuleTest;
 		.start(start), 
 		.xAddressOut(xAddressOut), 
 		.yAddressOut(yAddressOut), 
-		.activeWindows(activeWindows), 
+		.xMedianAddress(xMedianAddress),
+		.yMedianAddress(yMedianAddress), 
 		.filterDone(filterDone), 
 		.filterReady(filterReady),
-		.medianDataOut(medianDataOut)
+		.dataOut(dataOut),
+		.writeEnable(writeEnable)
 	);
 
 	initial begin
@@ -59,7 +63,6 @@ module filteringModuleTest;
 		reset = 1;
 		dataIn = 0;
 		start = 0;
-		init = 0;
 
 		// Wait 100 ns for global reset to finish
 		#85;
@@ -85,28 +88,29 @@ module filteringModuleTest;
 	end
 	
 // Internals
-wire [7:0] xAddressCntr;
-assign xAddressCntr = uut.xAddressCntr;
-wire [7:0] yAddressCntr;
-assign yAddressCntr = uut.yAddressCntr;
-wire [7:0] xMedianAddressOut;
-assign xMedianAddressOut = uut.xMedianAddressOut;
-wire [7:0] yMedianAddressOut;
-assign yMedianAddressOut = uut.yMedianAddressOut;
-wire [7:0] xMedianAddress;
-assign xMedianAddress = uut.xMedianAddress;
-wire [7:0] yMedianAddress;
-assign yMedianAddress = uut.yMedianAddress;
-wire dataValid;
-assign dataValid = uut.dataValid;
-wire [3:0] sum;
-assign sum = uut.sum;
-wire [3:0] sumWire;
-assign sumWire = uut.sumWire;
-wire [3:0] pixelCounter;
-assign pixelCounter = uut.pixelCounter;
-wire write;
-assign write = uut.write;
+//wire [7:0] xAddressCntr;
+//assign xAddressCntr = uut.xAddressCntr;
+//wire [7:0] yAddressCntr;
+//assign yAddressCntr = uut.yAddressCntr;
+//wire [7:0] xMedianAddress;
+//assign xMedianAddress = uut.xMedianAddress;
+//wire [7:0] yMedianAddress;
+//assign yMedianAddress = uut.yMedianAddress;
+//wire dataValid;
+//assign dataValid = uut.dataValid;
+//wire [3:0] counter;
+//assign counter = uut.dataProcessInst.pixelCounter;
+//wire [3:0] sum;
+//assign sum = uut.dataProcessInst.sum;
+//wire [3:0] sumWire;
+//assign sumWire = uut.dataProcessInst.sumWire;
+//wire writeEnable;
+//assign writeEnable = uut.writeEnable;
+
+//wire [7:0] xSync;
+//assign xSync = uut.dataProcessInst.xAddressSync1;
+//wire [7:0] ySync;
+//assign ySync = uut.dataProcessInst.yAddressSync1;
 
 endmodule
 
