@@ -57,6 +57,7 @@ reg pixelData;
 reg readHistogram;
 reg startHistogram;
 reg clearHistogram;
+reg histogramDone;
 
 wire [7:0] xHistogramOut;
 wire [7:0] yHistogramOut;
@@ -75,6 +76,17 @@ wire [7:0] xCounter;
 wire [7:0] yCounter;
 assign xCounter = DUT.xCounter;
 assign yCounter = DUT.yCounter;
+
+wire [1:0] state;
+assign state = DUT.state;
+
+wire readDone;
+assign readDone = DUT.readDone;
+wire xDone;
+assign xDone = DUT.xDone;
+wire yDone;
+assign yDone = DUT.yDone;
+
 //Internal signals
 //wire [7:0] xHistogram_0;
 //assign xHistogram_0 = DUT.xHistogram[0];
@@ -96,6 +108,7 @@ computeHistogram DUT (
         .startHistogram(startHistogram),
 		  .clearHistogram(clearHistogram),
         .readHistogram(readHistogram),
+		  .histogramDone(histogramDone),
         .xHistogramOut(xHistogramOut),
         .yHistogramOut(yHistogramOut),
         .xValid(xValid),
@@ -111,6 +124,8 @@ initial begin
 	 clearHistogram = 0;
     #125
     startHistogram = 1;
+	 #10
+	 startHistogram = 0;
     readHistogram = 0;
     for (i = 0; i < 240; i = i + 1) begin
         xAddress = i;
@@ -120,33 +135,43 @@ initial begin
             #(SYSCLK_PERIOD * 1);
         end
     end
+	 histogramDone = 1;
+	 #20
+	 histogramDone = 0;
+	 #10
+	 readHistogram = 1;
+	 #10
+	 readHistogram = 0;
 end
 
 initial begin
-    #432135
-    readHistogram = 1;
+	#434645
+	clearHistogram = 1;
+	#10
+	clearHistogram = 0;
+end
+
+initial begin
+	#437100
+	readHistogram = 1;
+	#10
+	readHistogram = 0;
+end
+
+initial begin
+#439565
+    startHistogram = 1;
+	 #10
 	 startHistogram = 0;
-end
-
-initial begin
-	#434995 readHistogram = 0;
-	#10 readHistogram = 1;
-end
-
-initial begin
-	#437405 readHistogram = 0;
-end
-
-initial begin
-	#440395 clearHistogram = 0;
-end
-
-initial begin
-	#440995 readHistogram = 1;
-end
-
-initial begin
-	#437995 clearHistogram = 1;
+    readHistogram = 0;
+    for (i = 0; i < 240; i = i + 1) begin
+        xAddress = i;
+        for (j = 0; j < 180; j = j + 1) begin
+            yAddress = j;
+            pixelData = $random % 2;
+            #(SYSCLK_PERIOD * 1);
+        end
+    end
 end
 
 endmodule

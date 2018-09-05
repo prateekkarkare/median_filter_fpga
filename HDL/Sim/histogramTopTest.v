@@ -80,7 +80,7 @@ wire [7:0] xHistogramOut;
 wire [7:0] yHistogramOut;
 wire xValid;
 wire yValid;
-wire histogramCleared;
+wire histogramClear;
 
 //Internal Signals
 
@@ -112,7 +112,7 @@ histogramTop DUT (
 		.yHistogramOut(yHistogramOut),
 		.xValid(xValid),
 		.yValid(yValid),
-		.histogramCleared(histogramCleared)
+		.histogramClear(histogramClear)
     );
 
 // For filtered image memory

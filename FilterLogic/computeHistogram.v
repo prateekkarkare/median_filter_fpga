@@ -27,26 +27,41 @@ module computeHistogram (
 		input startHistogram, 
 		input readHistogram, 
 		input clearHistogram,
+		input histogramDone,
 		output reg [7:0] xHistogramOut, 
 		output reg [7:0] yHistogramOut, 
 		output reg xValid, 
 		output reg yValid,
-		output histogramCleared
+		output reg histogramClear
 		);
 		
 localparam IMWIDTH = 240;
 localparam IMHEIGHT = 180;
 
+// Register bank for histogram storage
 reg [7:0] xHistogram[0:IMWIDTH-1];
 reg [7:0] yHistogram[0:IMHEIGHT-1];
 
+// Counters to read histogram
 reg [7:0] xCounter;
 reg [7:0] yCounter;
 
+// Clear status
 reg xClear;
 reg yClear;
 
-assign histogramCleared = xClear && yClear;
+// Read Status
+reg xDone;
+reg yDone;
+reg readDone;
+
+// Compute status
+
+// State registers
+reg [1:0] state;
+reg [1:0] nextState;
+
+parameter IDLE = 2'b00, COMPUTE = 2'b01, CLEAR = 2'b10, READ = 2'b11;
 
 integer i;
 integer j;
@@ -58,78 +73,121 @@ initial begin
         yHistogram[j] = 0;
     end
 end
-//<statements>
-always @ (posedge clk) begin
-    if (reset) begin
-        xCounter <= 0;
-        yCounter <= 0;
-        xValid <= 0;
-        yValid <= 0;
-    end
-    else if (startHistogram) begin
-        xHistogram[xAddress] <= xHistogram[xAddress] + pixelData;
-        yHistogram[yAddress] <= yHistogram[yAddress] + pixelData;
-    end
-    else begin
-        xHistogram[xAddress] <= xHistogram[xAddress];
-        yHistogram[yAddress] <= yHistogram[yAddress];
-    end
 
-    if (readHistogram) begin
-        if (xCounter == IMWIDTH - 1) begin
-            xCounter <= xCounter;
+always @ (posedge clk) begin
+	if (reset) begin
+		state <= IDLE;
+	end
+	else begin
+		state <= nextState;
+	end
+end
+
+always @ (*) begin
+	case (state)
+		IDLE: begin
+			if (startHistogram) begin
+				nextState <= COMPUTE;
+			end
+			else if (clearHistogram) begin
+				nextState <= CLEAR;
+			end
+			else if (readHistogram) begin
+				nextState <= READ;
+			end
+			else begin
+				nextState <= IDLE;
+			end
+		end
+		COMPUTE: begin
+			if (histogramDone) begin
+				nextState <= IDLE;
+			end
+			else begin
+				nextState <= COMPUTE;
+			end
+		end
+		CLEAR: begin
+			if (histogramClear) begin
+				nextState <= IDLE;
+			end
+			else begin
+				nextState <= CLEAR;
+			end
+		end
+		READ: begin
+			if (readDone) begin
+				nextState <= IDLE;
+			end
+			else begin
+				nextState <= READ;
+			end
+		end
+	endcase
+end
+
+always @ (posedge clk) begin
+	case (state)
+		COMPUTE: begin
+			xHistogram[xAddress] <= xHistogram[xAddress] + pixelData;
+			yHistogram[yAddress] <= yHistogram[yAddress] + pixelData;
+			histogramClear <= 0;
+		end
+		READ: begin
+			if (xCounter == IMWIDTH - 1) begin
+				xCounter <= xCounter;
             xValid <= 0;
-        end
-        else begin
+				xDone <= 1;
+			end
+			else begin
             xCounter <= xCounter + 1;
             xValid <= 1;
-        end
-
-        if (yCounter == IMHEIGHT - 1) begin
+				xDone <= xDone;
+			end
+			if (yCounter == IMHEIGHT - 1) begin
             yCounter <= yCounter;
             yValid <= 0;
-        end
-        else begin
+				yDone <= 1;
+			end
+			else begin
             yCounter <= yCounter + 1;
             yValid <= 1;
-        end
-
-        yHistogramOut <= yHistogram[yCounter];
-        xHistogramOut <= xHistogram[xCounter];
-    end
-	 else if (clearHistogram) begin
-		  if (xCounter == IMWIDTH - 1) begin
+				yDone <= yDone;
+			end
+			readDone <= xDone && yDone;
+			yHistogramOut <= yHistogram[yCounter];
+			xHistogramOut <= xHistogram[xCounter];
+		end
+		CLEAR: begin
+			if (xCounter == IMWIDTH - 1) begin
 				xCounter <= xCounter;
 				xClear <= 1;
-        end
-        else begin
+			end
+			else begin
             xCounter <= xCounter + 1;
 				xClear <= 0;
-        end
-		  
-		  if (yCounter == IMHEIGHT - 1) begin
+			end
+			if (yCounter == IMHEIGHT - 1) begin
             yCounter <= yCounter;
 				yClear <= 1;
-        end
-        else begin
+			end
+			else begin
             yCounter <= yCounter + 1;
 				yClear <= 0;
-        end
-		  
-		  yHistogram[yCounter] <= 0;
-        xHistogram[xCounter] <= 0;
-		  
-	 end
-    else begin
-        xHistogramOut <= 0;
-        yHistogramOut <= 0;
-        xCounter <= 0;
-        yCounter <= 0;
-        xValid <= 0;
-        yValid <= 0;
-		  xClear <= 0;
-		  yClear <= 0;
-    end
+			end
+			histogramClear <= xClear && yClear;
+			yHistogram[yCounter] <= 0;
+			xHistogram[xCounter] <= 0;
+		end
+		IDLE: begin
+			xCounter <= 0;
+			yCounter <= 0;
+			xDone <= 0;
+			yDone <= 0;
+			histogramClear <= histogramClear;
+			readDone <= 0;
+		end
+	endcase
 end
 
 endmodule

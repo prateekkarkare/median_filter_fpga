@@ -48,7 +48,7 @@ module histogramTop (
 		output [7:0] yHistogramOut, 
 		output xValid, 
 		output yValid,
-		output histogramCleared
+		output histogramClear
 		// ------------------------------- //
 		);
 
