@@ -103,61 +103,48 @@ always @ (*) begin
 end
 
 always @ (posedge clk) begin
-		case (state)
-			IDLE: begin
+	case (state)
+		IDLE: begin
+			jCounter <= 0;
+			iCounter <= 0;
+			xAddressCntr <= 0;
+			yAddressCntr <= 0;
+			filterReady <= 1;
+			xAddressDone <= 0;
+			yAddressDone <= 0;
+		end
+		FILTER: begin
+			filterReady <= 0;
+			if (jCounter == (WINDOW_SIZE - 1)) begin
 				jCounter <= 0;
-				iCounter <= 0;
-				xAddressCntr <= 0;
-				yAddressCntr <= 0;
-				filterReady <= 1;
-				xAddressDone <= 0;
-				yAddressDone <= 0;
-			end
-			FILTER: begin
-				filterReady <= 0;
-				if (jCounter == (WINDOW_SIZE - 1)) begin
-					jCounter <= 0;
-					jCounterDone <= 1;
+				if (iCounter == (WINDOW_SIZE - 1)) begin
+					iCounter <= 0;
+					if (xAddressCntr == (IMAGE_WIDTH - WINDOW_SIZE)) begin
+						xAddressCntr <= 0;
+						xAddressDone <= 1;
+						if (yAddressCntr == (IMAGE_HEIGHT - WINDOW_SIZE)) begin
+							yAddressCntr <= 0;
+							yAddressDone <= 1;
+						end
+						else begin
+							yAddressDone <= 0;
+							yAddressCntr <= yAddressCntr + 1'b1;
+						end
+					end
+					else begin
+						xAddressDone <= 0;
+						xAddressCntr <= xAddressCntr + 1'b1;
+					end
 				end
 				else begin
-					jCounterDone <= 0;
-					jCounter <= jCounter + 1'b1;
+					iCounter <= iCounter + 1'b1;
 				end
 			end
-		endcase
-end
-
-always @ (posedge jCounterDone) begin
-	if (iCounter == (WINDOW_SIZE - 1)) begin
-		iCounter <= 0;
-		iCounterDone <= 1;
-	end
-	else begin
-		iCounterDone <= 0;
-		iCounter <= iCounter + 1'b1;
-	end
-end
-
-always @ (posedge iCounterDone) begin
-	if (xAddressCntr == IMAGE_WIDTH - WINDOW_SIZE) begin
-		xAddressCntr <= 0;
-		xAddressDone <= 1;
-	end
-	else begin
-		xAddressDone <= 0;
-		xAddressCntr <= xAddressCntr + 1'b1;	//Stride step = 1
-	end
-end
-
-always @ (posedge xAddressDone) begin
-	if (yAddressCntr == IMAGE_HEIGHT - WINDOW_SIZE) begin
-		yAddressCntr <= 0;
-		yAddressDone <= 1;
-	end
-	else begin
-		yAddressCntr <= yAddressCntr + 1'b1;	//Stride step = 1
-		yAddressDone <= 0;
-	end
+			else begin
+				jCounter <= jCounter + 1'b1;
+			end
+		end
+	endcase
 end
 
 // Connectors

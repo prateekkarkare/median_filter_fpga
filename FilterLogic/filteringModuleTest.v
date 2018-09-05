@@ -35,7 +35,6 @@ module filteringModuleTest;
 	wire [7:0] yAddressOut;
 	wire [7:0] xMedianAddress;
 	wire [7:0] yMedianAddress;
-	wire [12:0] activeWindows;
 	wire filterDone;
 	wire dataOut;
 	wire filterReady;
