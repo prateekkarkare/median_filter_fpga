@@ -60,22 +60,18 @@ always @(SYSCLK)
 
 // Filtering module
 reg start;
-reg init;
-reg [12:0] threshold;
-wire wakeUp;
-wire fullImageDone;
+wire filterDone;
+wire filterReady;
 
 // Binary mem interface
 wire binaryDataIn;
 wire [7:0] xAddressOut;
 wire [7:0] yAddressOut;
-wire binaryMemWriteEnable;
 
 //Median memory interface
-wire [7:0] xAddressOutFiltered; 
-wire [7:0] yAddressOutFiltered;
-wire filteredMemWriteEnable;
-wire medianData;
+wire [7:0] xMedianAddress; 
+wire [7:0] yMedianAddress;
+wire writeEnable;
 
 // Histogram Signlas
 reg readHistogram;
@@ -89,14 +85,6 @@ wire histogramCleared;
 //Internal Signals
 
 
-//Two level signals
-wire [12:0] activeWindows;
-assign activeWindows = DUT.simpleMedianTopINST.activeWindows;
-
-
-//Assign Internal signals
-
-
 //////////////////////////////////////////////////////////////////////
 // Instantiate Unit Under Test:  histogramTop
 //////////////////////////////////////////////////////////////////////
@@ -106,20 +94,17 @@ histogramTop DUT (
 		.reset(NSYSRESET),
 		// Filtering Module signals
 		.start(start),
-		.init(init),			
-		.threshold(threshold),
-		.wakeUp(wakeUp),
-		.fullImageDone(fullImageDone),
+		.filterDone(filterDone),
+		.filterReady(filterReady),
 		// Binary Image Mem Interface
-		.binaryDataIn(binaryDataIn),
+		.dataIn(binaryDataIn),
 		.xAddressOut(xAddressOut),
 		.yAddressOut(yAddressOut),
-		.binaryMemWriteEnable(binaryMemWriteEnable),
 		//Filtered Image Mem interface
-		.xAddressOutFiltered(xAddressOutFiltered),
-		.yAddressOutFiltered(yAddressOutFiltered),
-		.filteredMemWriteEnable(filteredMemWriteEnable),
-		.medianData(medianData),
+		.xMedianAddress(xMedianAddress),
+		.yMedianAddress(yMedianAddress),
+		.writeEnable(writeEnable),
+		.dataOut(dataOut),
 		// Histogram Interface
 		.readHistogram(readHistogram),
 		.clearHistogram(clearHistogram),
@@ -131,26 +116,25 @@ histogramTop DUT (
     );
 
 // For filtered image memory
-wire medianDataOut;
+wire dataOut;
 wire [7:0] xAddressInMM;
 wire [7:0] yAddressInMM;
 reg [7:0] xAddressInMedian;
 reg [7:0] yAddressInMedian;
 reg readMedianMem;
 
-assign xAddressInMM = (readMedianMem)?xAddressInMedian:xAddressOutFiltered;
-assign yAddressInMM = (readMedianMem)?yAddressInMedian:xAddressOutFiltered;
+assign xAddressInMM = (readMedianMem)?xAddressInMedian:xMedianAddress;
+assign yAddressInMM = (readMedianMem)?yAddressInMedian:xMedianAddress;
 
 flatMem testMemFiltered (
 	.clk(SYSCLK), 
 	.reset(NSYSRESET),
 	.xAddressIn(xAddressInMM),
 	.yAddressIn(yAddressInMM), 
-	.dataIn(medianData), 
-	.write(filteredMemWriteEnable),
+	.dataIn(dataOut), 
+	.write(writeEnable),
 	.dataOut(medianDataOut) 
 	);
-
 
 // For Binary Image Memory
 reg dataIn;
@@ -161,9 +145,9 @@ reg [7:0] yAddressInBinary;
 wire wen;
 
 // Glue logic
-assign xMemAddressInBM = (start)?xAddressOut:xAddressInBinary;
-assign yMemAddressInBM = (start)?yAddressOut:yAddressInBinary;
-assign wen = (start)?binaryMemWriteEnable:1;
+assign xMemAddressInBM = (!filterReady)?xAddressOut:xAddressInBinary;
+assign yMemAddressInBM = (!filterReady)?yAddressOut:yAddressInBinary;
+assign wen = filterReady;
 
 flatMem testMem (
 	.clk(SYSCLK), 
@@ -178,12 +162,9 @@ flatMem testMem (
 integer i;
 integer j;
 initial begin
-	 init = 1;
     #115 
-	 init = 0;
     readMedianMem = 0;
 	 readHistogram = 0;
-    threshold = 50;
     start = 0;
     for (i = 0; i < 240; i = i + 1) begin
         xAddressInBinary = i;
@@ -193,14 +174,10 @@ initial begin
             #(SYSCLK_PERIOD * 1);
         end
     end 
-    #10
+    #20
     start = 1;
 end
 
-initial begin
-#4244905 init = 1;
-#10 init = 0;
-end
 
 initial begin
     #4244895
@@ -214,6 +191,7 @@ initial begin
             #(SYSCLK_PERIOD * 1);
         end
     end 
+	
 end
 
 

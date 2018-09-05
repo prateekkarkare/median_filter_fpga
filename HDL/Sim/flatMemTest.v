@@ -99,7 +99,7 @@ initial begin
             xAddressIn = i;
             for (j = 0; j < 180; j = j + 1) begin
                 yAddressIn = j;
-                dataIn = $urandom % 2;
+                dataIn = $random % 2;
                 #(SYSCLK_PERIOD * 1);
             end
         end

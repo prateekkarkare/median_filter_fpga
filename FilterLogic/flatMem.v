@@ -45,12 +45,17 @@ assign flatAddress = yAddressIn*IMWIDTH + xAddressIn;   //Convert the x,y addres
     end
 end*/
 
+reg dataDelay1, dataDelay2, dataDelay3;
+
 always @ (posedge clk) begin
     if (write) begin
         imageArray[flatAddress] <= dataIn;
     end
     else begin
-        dataOut <= imageArray[flatAddress];
+        dataDelay1 <= imageArray[flatAddress];
+		  dataDelay2 <= dataDelay1;
+		  dataDelay3 <= dataDelay2;
+		  dataOut <= dataDelay3;
     end
 end
 
