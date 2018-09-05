@@ -40,8 +40,10 @@ localparam IMAGEWIDTH = 240;
 localparam IMAGEHEIGHT = 180;
 localparam MEDIANVALUE = 4;
 
+// i & j counters count inside a window
 reg [1:0] iCounter;
 reg [1:0] jCounter;
+// Increments the addresses
 reg [7:0] xAddressCntr;
 reg [7:0] yAddressCntr;
 
@@ -62,6 +64,7 @@ reg filterReady;
 reg xAddressDone, yAddressDone;
 
 // Assignments
+// Out address = pixel address + offset for window pixels
 assign xAddressOut = xAddressCntr + jCounter;
 assign yAddressOut = yAddressCntr + iCounter;
 assign filterDone = xAddressDone && yAddressDone;
@@ -72,6 +75,7 @@ always @ (posedge clk) begin
 	end
 	else begin
 		state <= nextState;
+		// To account for memory read latency
 		dataValidSync <= !filterReady;
 		dataValid <= dataValidSync;
 	end

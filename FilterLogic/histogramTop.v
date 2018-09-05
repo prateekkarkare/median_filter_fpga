@@ -87,6 +87,5 @@ computeHistogram computeHistogramInst(
 				.ready(ready)
             );
 
-
 endmodule
 
