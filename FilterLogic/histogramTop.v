@@ -48,7 +48,8 @@ module histogramTop (
 		output [7:0] yHistogramOut, 
 		output xValid, 
 		output yValid,
-		output histogramClear
+		output histogramClear,
+		output ready
 		// ------------------------------- //
 		);
 
@@ -75,13 +76,15 @@ computeHistogram computeHistogramInst(
             .yAddress(yMedianAddress),
             .pixelData(dataOut),
             .startHistogram(start),
+				.stopHistogram(filterDone),
             .readHistogram(readHistogram), 
 				.clearHistogram(clearHistogram),
             .xHistogramOut(xHistogramOut), 
             .yHistogramOut(yHistogramOut), 
             .xValid(xValid), 
             .yValid(yValid),
-				.histogramCleared(histgramCleared)
+				.histogramClear(histogramClear),
+				.ready(ready)
             );
 
 

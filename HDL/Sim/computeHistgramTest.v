@@ -57,7 +57,7 @@ reg pixelData;
 reg readHistogram;
 reg startHistogram;
 reg clearHistogram;
-reg histogramDone;
+reg stopHistogram;
 
 wire [7:0] xHistogramOut;
 wire [7:0] yHistogramOut;
@@ -66,7 +66,7 @@ wire histogramClear;
 wire xValid;
 wire yValid;
 
-
+/*
 wire xClear;
 wire yClear;
 assign xClear = DUT.xClear;
@@ -86,7 +86,7 @@ wire xDone;
 assign xDone = DUT.xDone;
 wire yDone;
 assign yDone = DUT.yDone;
-
+*/
 //Internal signals
 //wire [7:0] xHistogram_0;
 //assign xHistogram_0 = DUT.xHistogram[0];
@@ -108,7 +108,7 @@ computeHistogram DUT (
         .startHistogram(startHistogram),
 		  .clearHistogram(clearHistogram),
         .readHistogram(readHistogram),
-		  .histogramDone(histogramDone),
+		  .stopHistogram(stopHistogram),
         .xHistogramOut(xHistogramOut),
         .yHistogramOut(yHistogramOut),
         .xValid(xValid),
@@ -135,9 +135,9 @@ initial begin
             #(SYSCLK_PERIOD * 1);
         end
     end
-	 histogramDone = 1;
+	 stopHistogram = 1;
 	 #20
-	 histogramDone = 0;
+	 stopHistogram = 0;
 	 #10
 	 readHistogram = 1;
 	 #10

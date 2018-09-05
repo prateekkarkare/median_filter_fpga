@@ -81,9 +81,11 @@ wire [7:0] yHistogramOut;
 wire xValid;
 wire yValid;
 wire histogramClear;
+wire ready;
 
 //Internal Signals
-
+wire [1:0] state;
+assign state = DUT.computeHistogramInst.state;
 
 //////////////////////////////////////////////////////////////////////
 // Instantiate Unit Under Test:  histogramTop
@@ -112,7 +114,8 @@ histogramTop DUT (
 		.yHistogramOut(yHistogramOut),
 		.xValid(xValid),
 		.yValid(yValid),
-		.histogramClear(histogramClear)
+		.histogramClear(histogramClear),
+		.ready(ready)
     );
 
 // For filtered image memory
@@ -176,6 +179,8 @@ initial begin
     end 
     #20
     start = 1;
+	 #10 
+	 start = 0;
 end
 
 
@@ -183,7 +188,10 @@ initial begin
     #4244895
     start = 0;
     readMedianMem = 1;
+	 #20
 	 readHistogram = 1;
+	 #10 
+	 readHistogram = 0;
     for (i = 0; i < 240; i = i + 1) begin
         xAddressInMedian = i;
         for (j = 0; j < 180; j = j + 1) begin

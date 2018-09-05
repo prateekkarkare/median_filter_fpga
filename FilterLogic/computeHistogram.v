@@ -27,12 +27,13 @@ module computeHistogram (
 		input startHistogram, 
 		input readHistogram, 
 		input clearHistogram,
-		input histogramDone,
+		input stopHistogram,
 		output reg [7:0] xHistogramOut, 
 		output reg [7:0] yHistogramOut, 
 		output reg xValid, 
 		output reg yValid,
-		output reg histogramClear
+		output reg histogramClear,
+		output ready
 		);
 		
 localparam IMWIDTH = 240;
@@ -56,6 +57,7 @@ reg yDone;
 reg readDone;
 
 // Compute status
+reg ready;
 
 // State registers
 reg [1:0] state;
@@ -100,7 +102,7 @@ always @ (*) begin
 			end
 		end
 		COMPUTE: begin
-			if (histogramDone) begin
+			if (stopHistogram) begin
 				nextState <= IDLE;
 			end
 			else begin
@@ -132,6 +134,7 @@ always @ (posedge clk) begin
 			xHistogram[xAddress] <= xHistogram[xAddress] + pixelData;
 			yHistogram[yAddress] <= yHistogram[yAddress] + pixelData;
 			histogramClear <= 0;
+			ready <= 0;
 		end
 		READ: begin
 			if (xCounter == IMWIDTH - 1) begin
@@ -154,6 +157,7 @@ always @ (posedge clk) begin
             yValid <= 1;
 				yDone <= yDone;
 			end
+			ready <= 0;
 			readDone <= xDone && yDone;
 			yHistogramOut <= yHistogram[yCounter];
 			xHistogramOut <= xHistogram[xCounter];
@@ -175,6 +179,7 @@ always @ (posedge clk) begin
             yCounter <= yCounter + 1;
 				yClear <= 0;
 			end
+			ready <= 0;
 			histogramClear <= xClear && yClear;
 			yHistogram[yCounter] <= 0;
 			xHistogram[xCounter] <= 0;
@@ -186,6 +191,7 @@ always @ (posedge clk) begin
 			yDone <= 0;
 			histogramClear <= histogramClear;
 			readDone <= 0;
+			ready <= 1;
 		end
 	endcase
 end
