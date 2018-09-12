@@ -8,3 +8,6 @@
 !.gitignore
 !*.vhd
 !*.v
+!*.docx
+!*.pdf
+~*
