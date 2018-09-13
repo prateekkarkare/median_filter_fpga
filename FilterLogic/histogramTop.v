@@ -67,25 +67,25 @@ filteringModule filterInstance (
 		.filterReady(filterReady),
 		.dataOut(dataOut),
 		.writeEnable(writeEnable)
-	);
+	   );
 
 computeHistogram computeHistogramInst( 
-            .clk(clk), 
-            .reset(reset),
-            .xAddress(xMedianAddress),
-            .yAddress(yMedianAddress),
-            .pixelData(dataOut),
-            .startHistogram(start),
-				.stopHistogram(filterDone),
-            .readHistogram(readHistogram), 
-				.clearHistogram(clearHistogram),
-            .xHistogramOut(xHistogramOut), 
-            .yHistogramOut(yHistogramOut), 
-            .xValid(xValid), 
-            .yValid(yValid),
-				.histogramClear(histogramClear),
-				.ready(ready)
-            );
+        .clk(clk), 
+        .reset(reset),
+        .xAddress(xMedianAddress),
+        .yAddress(yMedianAddress),
+        .pixelData(dataOut),
+        .startHistogram(start),
+		.stopHistogram(filterDone),
+        .readHistogram(readHistogram), 
+		.clearHistogram(clearHistogram),
+        .xHistogramOut(xHistogramOut), 
+        .yHistogramOut(yHistogramOut), 
+        .xValid(xValid), 
+        .yValid(yValid),
+		.histogramClear(histogramClear),
+		.ready(ready)
+		);
 
 endmodule
 

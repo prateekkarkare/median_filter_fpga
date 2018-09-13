@@ -119,7 +119,7 @@ histogramTop DUT (
     );
 
 // For filtered image memory
-wire dataOut;
+
 wire [7:0] xAddressInMM;
 wire [7:0] yAddressInMM;
 reg [7:0] xAddressInMedian;
@@ -166,6 +166,7 @@ integer i;
 integer j;
 initial begin
     #115 
+    clearHistogram = 0;
     readMedianMem = 0;
 	 readHistogram = 0;
     start = 0;

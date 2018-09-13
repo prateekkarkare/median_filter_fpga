@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module medianProcess(
+module medianProcess #(parameter WINDOW_SIZE = 3) (
 	input clk,
 	input reset,
 	input dataValid,
@@ -31,10 +31,13 @@ module medianProcess(
 	output dataOut
     );
 
+localparam pixelCounterWidth = $clog2(WINDOW_SIZE*WINDOW_SIZE);
+localparam centerPixelOffset = $floor(WINDOW_SIZE/2);
+
 // Data Processing logic
-reg [3:0] sum;
-wire [3:0] sumWire; 
-reg [3:0] pixelCounter;
+reg [pixelCounterWidth - 1:0] sum;
+wire [pixelCounterWidth - 1:0] sumWire; 
+reg [pixelCounterWidth - 1:0] pixelCounter;
 reg [7:0] xMedianAddress;
 reg [7:0] yMedianAddress;
 
@@ -64,9 +67,9 @@ always @ (posedge clk) begin
 	// Assign output address at every 9th data pixel (for 3x3 window)
 	// Address is subtracted by 1 each since the Sync addresses are addresses of bottom right
 	// pixel of the window
-	if (pixelCounter == 8) begin
-		xMedianAddress <= xAddressSync3 - 1'b1;
-		yMedianAddress <= yAddressSync3 - 1'b1;
+	if (pixelCounter == (WINDOW_SIZE*WINDOW_SIZE - 1)) begin
+		xMedianAddress <= xAddressSync3 - centerPixelOffset;
+		yMedianAddress <= yAddressSync3 - centerPixelOffset;;
 	end
 	else begin
 		xMedianAddress <= 0;
@@ -77,11 +80,11 @@ end
 always @ (posedge clk) begin
 	if (dataValid) begin
 		// Count 9 pixels (for 3x3 window) after data valid is asserted
-		if (pixelCounter == 8) begin
+		if (pixelCounter == (WINDOW_SIZE*WINDOW_SIZE - 1)) begin
 			pixelCounter <= 0;
 			sum <= 0;
 			// If number of pixels in 3x3 window is greater than 4 then center pixel = 1
-			if (sumWire > 4) begin
+			if (sumWire > (WINDOW_SIZE*WINDOW_SIZE/2 - 1)) begin
 				writeEnable <= 1;
 			end
 			else begin

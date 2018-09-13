@@ -85,6 +85,7 @@ always @ (posedge clk) begin
 	end
 end
 
+//always @ (state or startHistogram or clearHistogram or readHistogram or stopHistogram or histogramClear or readDone) begin
 always @ (*) begin
 	case (state)
 		IDLE: begin
@@ -192,6 +193,10 @@ always @ (posedge clk) begin
 			histogramClear <= histogramClear;
 			readDone <= 0;
 			ready <= 1;
+			xHistogramOut <= 0;
+			yHistogramOut <= 0;
+			xValid <= 0;
+			yValid <= 0;
 		end
 	endcase
 end

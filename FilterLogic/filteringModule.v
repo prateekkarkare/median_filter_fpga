@@ -34,23 +34,21 @@ module filteringModule(
 	);
 
 //Parameters
-localparam WINDOWSIZE = 3;
-localparam WINDOWSTEP = 1;
-localparam IMAGEWIDTH = 240;
-localparam IMAGEHEIGHT = 180;
-localparam MEDIANVALUE = 4;
+parameter WINDOW_SIZE = 3;
+parameter IMAGE_WIDTH = 240;
+parameter IMAGE_HEIGHT = 180;
+parameter WINDOW_STEP = 1;
+
+localparam counterWidth = $clog2(WINDOW_SIZE);
 
 // i & j counters count inside a window
-reg [1:0] iCounter;
-reg [1:0] jCounter;
+reg [counterWidth-1:0] iCounter;
+reg [counterWidth-1:0] jCounter;
 // Increments the addresses
 reg [7:0] xAddressCntr;
 reg [7:0] yAddressCntr;
 
-parameter IDLE = 1'b0, FILTER = 1'b1;
-localparam WINDOW_SIZE = 3;
-localparam IMAGE_WIDTH = 240;
-localparam IMAGE_HEIGHT = 180;
+localparam IDLE = 1'b0, FILTER = 1'b1;
 
 // Data sync registers
 reg dataValid, dataValidSync;
@@ -85,18 +83,18 @@ always @ (*) begin
 	case (state)
 		IDLE: begin 
 			if (start) begin
-				nextState <= FILTER;
+				nextState = FILTER;
 			end
 			else begin
-				nextState <= IDLE;
+				nextState = IDLE;
 			end
 		end
 		FILTER: begin
 			if (xAddressDone && yAddressDone) begin
-				nextState <= IDLE;
+				nextState = IDLE;
 			end
 			else begin
-				nextState <= FILTER;
+				nextState = FILTER;
 			end
 		end
 	endcase
@@ -153,7 +151,7 @@ wire [7:0] yMedianAddress;
 wire writeEnable;
 wire dataOut;
 
-medianProcess dataProcessInst (
+medianProcess #(WINDOW_SIZE) dataProcessInst (
 	.clk(clk),
 	.reset(reset),
 	.dataValid(dataValid),
