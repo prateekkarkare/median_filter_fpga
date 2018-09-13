@@ -39,7 +39,17 @@ parameter IMAGE_WIDTH = 240;
 parameter IMAGE_HEIGHT = 180;
 parameter WINDOW_STEP = 1;
 
-localparam counterWidth = $clog2(WINDOW_SIZE);
+function integer clog2;
+    input integer value;
+    begin
+        value = value - 1;
+        for (clog2 = 0; value > 0; clog2 = clog2 + 1) begin
+            value = value >> 1;
+        end
+    end
+endfunction
+
+localparam counterWidth = clog2(WINDOW_SIZE);
 
 // i & j counters count inside a window
 reg [counterWidth-1:0] iCounter;

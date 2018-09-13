@@ -63,7 +63,7 @@ reg ready;
 reg [1:0] state;
 reg [1:0] nextState;
 
-parameter IDLE = 2'b00, COMPUTE = 2'b01, CLEAR = 2'b10, READ = 2'b11;
+localparam IDLE = 2'b00, COMPUTE = 2'b01, CLEAR = 2'b10, READ = 2'b11;
 
 integer i;
 integer j;
@@ -132,30 +132,33 @@ end
 always @ (posedge clk) begin
 	case (state)
 		COMPUTE: begin
+		    // Accumulate incoming pixel values for the corresponding addresses
 			xHistogram[xAddress] <= xHistogram[xAddress] + pixelData;
 			yHistogram[yAddress] <= yHistogram[yAddress] + pixelData;
 			histogramClear <= 0;
 			ready <= 0;
 		end
 		READ: begin
+			// Start a counter for x histogram values
 			if (xCounter == IMWIDTH - 1) begin
 				xCounter <= xCounter;
-            xValid <= 0;
+                xValid <= 0;
 				xDone <= 1;
 			end
 			else begin
-            xCounter <= xCounter + 1;
-            xValid <= 1;
+                xCounter <= xCounter + 1;
+                xValid <= 1;
 				xDone <= xDone;
 			end
+			// Start a counter for y histogram values
 			if (yCounter == IMHEIGHT - 1) begin
-            yCounter <= yCounter;
-            yValid <= 0;
+                yCounter <= yCounter;
+                yValid <= 0;
 				yDone <= 1;
 			end
 			else begin
-            yCounter <= yCounter + 1;
-            yValid <= 1;
+                yCounter <= yCounter + 1;
+                yValid <= 1;
 				yDone <= yDone;
 			end
 			ready <= 0;

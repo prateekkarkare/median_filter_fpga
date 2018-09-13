@@ -31,8 +31,19 @@ module medianProcess #(parameter WINDOW_SIZE = 3) (
 	output dataOut
     );
 
-localparam pixelCounterWidth = $clog2(WINDOW_SIZE*WINDOW_SIZE);
-localparam centerPixelOffset = $floor(WINDOW_SIZE/2);
+// Function to compute log base 2 (for synthesizability can't use $clog2) 
+function integer clog2;
+    input integer value;
+    begin
+        value = value - 1;
+        for (clog2 = 0; value > 0; clog2 = clog2 + 1) begin
+            value = value >> 1;
+        end
+    end
+endfunction
+
+localparam pixelCounterWidth = clog2(WINDOW_SIZE*WINDOW_SIZE);
+localparam centerPixelOffset = WINDOW_SIZE/2;   // Floor is not required here since verilog automatically rounds it down
 
 // Data Processing logic
 reg [pixelCounterWidth - 1:0] sum;
