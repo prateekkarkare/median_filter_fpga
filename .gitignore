@@ -8,6 +8,9 @@
 !.gitignore
 !*.vhd
 !*.v
+!*.docx
+!*.pdf
 
-# Ignore Directories
+# Ignore
 vivado_minion/
+~*
