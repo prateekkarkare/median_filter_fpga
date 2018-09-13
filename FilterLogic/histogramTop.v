@@ -53,8 +53,14 @@ module histogramTop (
 		// ------------------------------- //
 		);
 
+//Parameters
+parameter WINDOW_SIZE = 3;
+parameter IMAGE_WIDTH = 240;
+parameter IMAGE_HEIGHT = 180;
+parameter WINDOW_STEP = 1;
+
 //<statements>
-filteringModule filterInstance (
+filteringModule #(IMAGE_WIDTH, IMAGE_HEIGHT, WINDOW_STEP, WINDOW_SIZE) filterInstance (
 		.clk(clk), 
 		.reset(reset), 
 		.dataIn(dataIn), 
@@ -69,7 +75,7 @@ filteringModule filterInstance (
 		.writeEnable(writeEnable)
 	   );
 
-computeHistogram computeHistogramInst( 
+computeHistogram #(IMAGE_WIDTH, IMAGE_HEIGHT) computeHistogramInst( 
         .clk(clk), 
         .reset(reset),
         .xAddress(xMedianAddress),

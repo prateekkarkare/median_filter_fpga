@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module filteringModule( 
+module filteringModule #(parameter IMAGE_WIDTH = 240, parameter IMAGE_HEIGHT= 180, parameter WINDOW_STEP = 1, parameter WINDOW_SIZE = 3) ( 
 	input clk, 
 	input reset, 
 	input dataIn, 
@@ -32,12 +32,6 @@ module filteringModule(
 	output dataOut,
 	output writeEnable
 	);
-
-//Parameters
-parameter WINDOW_SIZE = 3;
-parameter IMAGE_WIDTH = 240;
-parameter IMAGE_HEIGHT = 180;
-parameter WINDOW_STEP = 1;
 
 function integer clog2;
     input integer value;

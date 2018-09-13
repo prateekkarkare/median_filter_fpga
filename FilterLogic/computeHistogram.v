@@ -18,7 +18,7 @@
 
 //`timescale <time_units> / <precision>
 
-module computeHistogram ( 
+module computeHistogram #(parameter IMAGE_WIDTH = 240, parameter IMAGE_HEIGHT = 180) ( 
 		input clk, 
 		input reset, 
 		input [7:0] xAddress, 
@@ -35,13 +35,10 @@ module computeHistogram (
 		output reg histogramClear,
 		output ready
 		);
-		
-localparam IMWIDTH = 240;
-localparam IMHEIGHT = 180;
 
 // Register bank for histogram storage
-reg [7:0] xHistogram[0:IMWIDTH-1];
-reg [7:0] yHistogram[0:IMHEIGHT-1];
+reg [7:0] xHistogram[0:IMAGE_WIDTH-1];
+reg [7:0] yHistogram[0:IMAGE_HEIGHT-1];
 
 // Counters to read histogram
 reg [7:0] xCounter;
@@ -68,10 +65,10 @@ localparam IDLE = 2'b00, COMPUTE = 2'b01, CLEAR = 2'b10, READ = 2'b11;
 integer i;
 integer j;
 initial begin
-    for (i = 0; i < IMWIDTH; i = i + 1) begin
+    for (i = 0; i < IMAGE_WIDTH; i = i + 1) begin
         xHistogram[i] = 0;
     end
-    for (j = 0; j < IMHEIGHT; j = j + 1) begin
+    for (j = 0; j < IMAGE_HEIGHT; j = j + 1) begin
         yHistogram[j] = 0;
     end
 end
@@ -140,7 +137,7 @@ always @ (posedge clk) begin
 		end
 		READ: begin
 			// Start a counter for x histogram values
-			if (xCounter == IMWIDTH - 1) begin
+			if (xCounter == IMAGE_WIDTH - 1) begin
 				xCounter <= xCounter;
                 xValid <= 0;
 				xDone <= 1;
@@ -151,7 +148,7 @@ always @ (posedge clk) begin
 				xDone <= xDone;
 			end
 			// Start a counter for y histogram values
-			if (yCounter == IMHEIGHT - 1) begin
+			if (yCounter == IMAGE_HEIGHT - 1) begin
                 yCounter <= yCounter;
                 yValid <= 0;
 				yDone <= 1;
@@ -167,7 +164,7 @@ always @ (posedge clk) begin
 			xHistogramOut <= xHistogram[xCounter];
 		end
 		CLEAR: begin
-			if (xCounter == IMWIDTH - 1) begin
+			if (xCounter == IMAGE_WIDTH - 1) begin
 				xCounter <= xCounter;
 				xClear <= 1;
 			end
@@ -175,7 +172,7 @@ always @ (posedge clk) begin
             xCounter <= xCounter + 1;
 				xClear <= 0;
 			end
-			if (yCounter == IMHEIGHT - 1) begin
+			if (yCounter == IMAGE_HEIGHT - 1) begin
             yCounter <= yCounter;
 				yClear <= 1;
 			end
